@@ -1,4 +1,7 @@
-﻿namespace Tagger;
+﻿using Microsoft.OpenApi.Models;
+using System.Reflection;
+
+namespace Tagger;
 
 public class Startup
 {
@@ -13,6 +16,20 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllers();
+        services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "My Good API",
+                Version = "v1",
+                Description = "cool tagging service"
+            });
+
+            // Set the comments path for the Swagger JSON and UI.
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            c.IncludeXmlComments(xmlPath);
+        });
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
@@ -20,8 +37,16 @@ public class Startup
     {
         if (env.IsDevelopment())
         {
+            app.UseSwagger();
+            app.UseSwaggerUI();
             app.UseDeveloperExceptionPage();
         }
+
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+            options.RoutePrefix = string.Empty;
+        });
 
         app.UseHttpsRedirection();
 
@@ -32,10 +57,6 @@ public class Startup
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
-            endpoints.MapGet("/", async context =>
-            {
-                await context.Response.WriteAsync("Welcome to running ASP.NET Core on AWS Lambda");
-            });
         });
     }
 }
