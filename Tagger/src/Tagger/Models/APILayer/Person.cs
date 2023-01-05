@@ -1,5 +1,5 @@
 ﻿using System;
-namespace Tagger.Models
+namespace Tagger.Models.APILayer
 {
 	public struct Person
 	{
